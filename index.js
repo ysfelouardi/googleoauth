@@ -16,7 +16,8 @@ require("./services/passport");
 const app = express();
 
 //middlewares
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(
   cookieSession({
     maxAge: 30 * 24 * 60 * 60 * 1000,

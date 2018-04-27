@@ -33,4 +33,9 @@ module.exports = app => {
           info: "logged out!"
         });
   });
+
+  //local authentication
+  app.post("/auth/local", passport.authenticate("local"), (req, res) => {
+    res.redirect("/api/current_user");
+  });
 };

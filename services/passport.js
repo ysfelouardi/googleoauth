@@ -1,5 +1,7 @@
 const passport = require("passport");
 const googleStrategy = require("passport-google-oauth20").Strategy;
+const localStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const keys = require("../config/keys");
 
@@ -14,7 +16,7 @@ passport.deserializeUser((userId, done) => {
     done(null, user);
   });
 });
-
+//googleStrategy
 passport.use(
   new googleStrategy(
     {
@@ -42,4 +44,31 @@ passport.use(
       });
     }
   )
+);
+
+//localStrategy
+passport.use(
+  new localStrategy((username, password, done) => {
+    //if user dosen't exist create a record
+    User.findOne({ username: username }).then(existingUser => {
+      if (existingUser) {
+        //comparing passwords
+        bcrypt.compare(password, existingUser.password, (err, result) => {
+          return result ? done(null, existingUser) : done(null, false);
+        });
+      } else {
+        bcrypt.hash(password, 10, (err, hash_pass) => {
+          // Store the record in the db
+          new User({
+            username: username,
+            password: hash_pass
+          })
+            .save()
+            .then(newuser => {
+              return done(null, newuser);
+            });
+        });
+      }
+    });
+  })
 );
